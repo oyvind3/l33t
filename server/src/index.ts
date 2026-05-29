@@ -3,6 +3,7 @@ import cors from 'cors';
 import userRoutes from './routes/users.js';
 import pollRoutes from './routes/polls.js';
 import voteRoutes from './routes/votes.js';
+import suggestionsRoutes from './routes/suggestions.js';
 import { authMiddleware } from './middleware/auth.js';
 
 const app = express();
@@ -15,6 +16,7 @@ app.use(authMiddleware);
 app.use('/api/users', userRoutes);
 app.use('/api/polls', pollRoutes);
 app.use('/api/polls', voteRoutes);
+app.use('/api/suggestions', suggestionsRoutes);
 
 app.listen(PORT, () => {
   console.log(`🎮 LAN Party Poll Server running on http://localhost:${PORT}`);

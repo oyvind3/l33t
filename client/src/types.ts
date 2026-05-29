@@ -30,3 +30,12 @@ export interface Vote {
   username: string;
   createdAt: string;
 }
+
+export interface Suggestion {
+  id: string;
+  title: string;
+  description: string;
+  userId: string;
+  username: string;
+  createdAt: string;
+}

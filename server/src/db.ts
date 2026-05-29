@@ -41,6 +41,16 @@ db.exec(`
     FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
     UNIQUE(pollId, userId)
   );
+
+  CREATE TABLE IF NOT EXISTS suggestions (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    userId TEXT NOT NULL,
+    username TEXT NOT NULL,
+    createdAt TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+  );
 `);
 
 export default db;

@@ -1,122 +1,120 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState, useEffect, useCallback, createContext, useContext } from 'react';
+import type { User, Poll, PollCategory } from './types';
+import { fetchPolls, registerUser } from './api';
+import LoginForm from './components/LoginForm';
+import Header from './components/Header';
+import PollList from './components/PollList';
+import CategoryFilter from './components/CategoryFilter';
+import AdminPanel from './components/AdminPanel';
+import SuggestionBox from './components/SuggestionBox';
+import MusicPlayer from './components/MusicPlayer';
 
-function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+interface AuthContextType {
+  user: User | null;
+  setUser: (user: User | null) => void;
+  logout: () => void;
 }
 
-export default App
+export const AuthContext = createContext<AuthContextType>({
+  user: null,
+  setUser: () => {},
+  logout: () => {},
+});
+
+export function useAuth() {
+  return useContext(AuthContext);
+}
+
+function App() {
+  const [user, setUser] = useState<User | null>(null);
+  const [polls, setPolls] = useState<Poll[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<PollCategory | 'Alle'>('Alle');
+  const [showAdmin, setShowAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Restore user from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem('pollapp_user');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        // Re-validate user with server
+        registerUser(parsed.username).then((u) => {
+          setUser(u);
+          localStorage.setItem('pollapp_user', JSON.stringify(u));
+        }).catch(() => {
+          localStorage.removeItem('pollapp_user');
+        });
+      } catch {
+        localStorage.removeItem('pollapp_user');
+      }
+    }
+  }, []);
+
+  const loadPolls = useCallback(async () => {
+    if (!user) return;
+    try {
+      const data = await fetchPolls();
+      setPolls(data);
+    } catch {
+      // Error handled by API client
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+
+  // Poll every 5 seconds
+  useEffect(() => {
+    if (!user) return;
+    loadPolls();
+    const interval = setInterval(loadPolls, 5000);
+    return () => clearInterval(interval);
+  }, [user, loadPolls]);
+
+  const logout = () => {
+    setUser(null);
+    setPolls([]);
+    localStorage.removeItem('pollapp_user');
+  };
+
+  const handleLogin = (u: User) => {
+    setUser(u);
+    localStorage.setItem('pollapp_user', JSON.stringify(u));
+  };
+
+  const filteredPolls = selectedCategory === 'Alle'
+    ? polls
+    : polls.filter((p) => p.category === selectedCategory);
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <LoginForm onLogin={handleLogin} />
+      </div>
+    );
+  }
+
+  return (
+    <AuthContext.Provider value={{ user, setUser, logout }}>
+      <div className="min-h-screen flex flex-col">
+        <Header onToggleAdmin={() => setShowAdmin(!showAdmin)} showAdmin={showAdmin} />
+
+        <main className="flex-1 max-w-7xl mx-auto w-full px-4 pb-8">
+          {showAdmin && user.isAdmin && (
+            <AdminPanel onPollCreated={loadPolls} polls={polls} onRefresh={loadPolls} />
+          )}
+
+          <SuggestionBox />
+
+          <CategoryFilter selected={selectedCategory} onSelect={setSelectedCategory} />
+
+          <PollList polls={filteredPolls} loading={loading} onVote={loadPolls} />
+        </main>
+
+        <MusicPlayer />
+      </div>
+    </AuthContext.Provider>
+  );
+}
+
+export default App;
