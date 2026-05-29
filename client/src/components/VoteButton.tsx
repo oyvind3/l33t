@@ -29,16 +29,16 @@ export default function VoteButton({ label, count, percent, isSelected, disabled
 
       <div className="relative flex items-center justify-between">
         <div className="flex items-center gap-2 min-w-0">
-          {isSelected && <span className="text-neon-green text-sm">✓</span>}
-          <span className={`font-mono text-sm truncate ${isSelected ? 'text-neon-green' : 'text-text-primary'}`}>
+          {isSelected && <span className="text-neon-green text-base">✓</span>}
+          <span className={`font-mono text-base truncate ${isSelected ? 'text-neon-green' : 'text-text-primary'}`}>
             {label}
           </span>
         </div>
 
         {showResults && (
-          <div className="flex items-center gap-2 ml-2 shrink-0">
-            <span className="font-mono text-xs text-text-secondary">{count}</span>
-            <span className={`font-mono text-xs font-bold ${isSelected ? 'text-neon-green' : 'text-neon-blue'}`}>
+          <div className="flex items-center gap-3 ml-2 shrink-0">
+            <span className="font-mono text-sm text-text-secondary">{count}</span>
+            <span className={`font-mono text-sm font-bold ${isSelected ? 'text-neon-green' : 'text-neon-blue'}`}>
               {percent}%
             </span>
           </div>

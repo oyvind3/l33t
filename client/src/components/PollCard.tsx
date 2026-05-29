@@ -42,32 +42,29 @@ export default function PollCard({ poll, onVote }: Props) {
   };
 
   return (
-    <div className="bg-bg-card border border-white/5 rounded-xl p-5 animate-slide-in hover:border-neon-blue/20 transition-all">
+    <div className="bg-bg-card border border-white/5 rounded-xl p-6 animate-slide-in hover:border-neon-blue/20 transition-all">
       {/* Header */}
-      <div className="flex items-start justify-between mb-3">
+      <div className="flex items-start justify-between mb-4">
         <div className="flex-1 min-w-0">
-          <h3 className="font-mono text-base font-bold text-text-primary truncate">{poll.title}</h3>
+          <h3 className="font-mono text-xl font-bold text-text-primary">{poll.title}</h3>
           {poll.description && (
-            <p className="text-text-secondary text-sm mt-1 line-clamp-2">{poll.description}</p>
+            <p className="text-text-secondary text-base mt-1">{poll.description}</p>
           )}
         </div>
       </div>
 
       {/* Badges */}
-      <div className="flex items-center gap-2 mb-4">
-        <span className={`font-mono text-[10px] px-2 py-0.5 rounded ${status.bg} ${status.color} ${status.border} border`}>
+      <div className="flex items-center gap-3 mb-5">
+        <span className={`font-mono text-xs px-3 py-1 rounded ${status.bg} ${status.color} ${status.border} border`}>
           {status.label}
         </span>
-        <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-white/5 text-text-secondary border border-white/10">
-          {CATEGORY_ICONS[poll.category]} {poll.category}
-        </span>
-        <span className="font-mono text-[10px] text-text-secondary ml-auto">
+        <span className="font-mono text-xs text-text-secondary ml-auto">
           {poll.totalVotes} stemme{poll.totalVotes !== 1 ? 'r' : ''}
         </span>
       </div>
 
       {/* Options */}
-      <div className="space-y-2">
+      <div className="space-y-2 md:grid md:grid-cols-2 md:gap-3 md:space-y-0">
         {poll.options.map((option, i) => {
           const count = poll.voteCounts[i] || 0;
           const percent = poll.totalVotes > 0 ? Math.round((count / poll.totalVotes) * 100) : 0;
