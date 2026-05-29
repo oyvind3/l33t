@@ -44,6 +44,7 @@ export default function MusicPlayer() {
         autoplay: 0,
         loop: 1,
         playlist: YOUTUBE_VIDEO_ID,
+        origin: window.location.origin,
       },
       events: {
         onReady: (event: YT.PlayerEvent) => {
