@@ -1,10 +1,8 @@
 import { useState } from 'react';
 import type { Poll } from '../types';
-import { useAuth } from '../App';
 import VoteButton from './VoteButton';
 import VoterList from './VoterList';
 import { vote } from '../api';
-import toast from 'react-hot-toast';
 
 interface Props {
   poll: Poll;
@@ -27,17 +25,14 @@ const CATEGORY_ICONS: Record<string, string> = {
 };
 
 export default function PollCard({ poll, onVote }: Props) {
-  const { user } = useAuth();
   const [voting, setVoting] = useState(false);
   const status = STATUS_CONFIG[poll.status];
-  const showResults = poll.status === 'results' || user?.isAdmin;
 
   const handleVote = async (optionIndex: number) => {
     if (poll.status !== 'open' || voting) return;
     setVoting(true);
     try {
       await vote(poll.id, optionIndex);
-      toast.success('Stemme registrert! ✅');
       onVote();
     } catch {
       // handled by API
@@ -76,7 +71,7 @@ export default function PollCard({ poll, onVote }: Props) {
         {poll.options.map((option, i) => {
           const count = poll.voteCounts[i] || 0;
           const percent = poll.totalVotes > 0 ? Math.round((count / poll.totalVotes) * 100) : 0;
-          const isSelected = poll.userVote === i;
+          const isSelected = poll.userVotes?.includes(i) ?? false;
           const voters = poll.voters?.[i] || [];
 
           return (
@@ -87,10 +82,10 @@ export default function PollCard({ poll, onVote }: Props) {
                 percent={percent}
                 isSelected={isSelected}
                 disabled={poll.status !== 'open' || voting}
-                showResults={!!showResults}
+                showResults={true}
                 onClick={() => handleVote(i)}
               />
-              {showResults && poll.status === 'results' && voters.length > 0 && (
+              {voters.length > 0 && (
                 <VoterList voters={voters} />
               )}
             </div>

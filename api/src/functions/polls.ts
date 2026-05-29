@@ -21,18 +21,15 @@ app.http('polls-get', {
           return pollVotes.filter((v) => v.optionIndex === i).length;
         });
 
-        const myVote = pollVotes.find((v) => v.userId === user.id);
-        const userVote = myVote ? myVote.optionIndex : null;
+        const myVotes = pollVotes.filter((v) => v.userId === user.id).map((v) => v.optionIndex);
 
-        let votersMap: Record<number, Array<{ userId: string; username: string }>> | undefined;
-        if (showVotes) {
-          votersMap = {};
-          poll.options.forEach((_, i) => {
-            votersMap![i] = pollVotes
-              .filter((v) => v.optionIndex === i)
-              .map((v) => ({ userId: v.userId, username: v.username }));
-          });
-        }
+        // Always show voters so people can see who voted what
+        const votersMap: Record<number, Array<{ userId: string; username: string }>> = {};
+        poll.options.forEach((_, i) => {
+          votersMap[i] = pollVotes
+            .filter((v) => v.optionIndex === i)
+            .map((v) => ({ userId: v.userId, username: v.username }));
+        });
 
         return {
           id: poll.id,
@@ -43,7 +40,7 @@ app.http('polls-get', {
           options: poll.options,
           voteCounts,
           voters: votersMap,
-          userVote,
+          userVotes: myVotes,
           totalVotes: voteCounts.reduce((a, b) => a + b, 0),
           createdAt: poll.createdAt,
         };
@@ -171,11 +168,11 @@ app.http('polls-vote', {
       return { status: 400, jsonBody: { error: 'Invalid option index' } };
     }
 
-    const existingIdx = votes.findIndex((v) => v.pollId === id && v.userId === user.id);
+    // Toggle vote: if already voted for this option, remove it. Otherwise, add it.
+    const existingIdx = votes.findIndex((v) => v.pollId === id && v.userId === user.id && v.optionIndex === body.optionIndex);
     if (existingIdx >= 0) {
-      votes[existingIdx].optionIndex = body.optionIndex;
-      votes[existingIdx].updatedAt = new Date().toISOString();
-      return { jsonBody: { message: 'Vote updated', optionIndex: body.optionIndex } };
+      votes.splice(existingIdx, 1);
+      return { jsonBody: { message: 'Vote removed', optionIndex: body.optionIndex } };
     }
 
     votes.push({

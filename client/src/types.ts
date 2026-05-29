@@ -19,7 +19,7 @@ export interface Poll {
   options: string[];
   voteCounts: number[];
   voters?: Record<number, Array<{ userId: string; username: string }>>;
-  userVote: number | null;
+  userVotes: number[];
   totalVotes: number;
   createdAt: string;
 }
