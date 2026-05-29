@@ -1,6 +1,8 @@
 import toast from 'react-hot-toast';
 import type { User, Poll } from './types';
 
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
 function getUserId(): string | null {
   const stored = localStorage.getItem('pollapp_user');
   if (stored) {
@@ -21,7 +23,7 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
     ...(options?.headers as Record<string, string> || {}),
   };
 
-  const res = await fetch(url, { ...options, headers });
+  const res = await fetch(API_BASE + url, { ...options, headers });
   const data = await res.json();
 
   if (!res.ok) {

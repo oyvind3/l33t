@@ -13,8 +13,8 @@ export default function Header({ onToggleAdmin, showAdmin }: Props) {
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h1 className="font-mono text-lg md:text-xl font-bold">
-            <span className="text-neon-green">LAN</span>{' '}
-            <span className="text-neon-blue">PARTY</span>{' '}
+            <span className="text-neon-green">HANI</span>
+            <span className="text-neon-blue">LAN</span>{' '}
             <span className="text-text-secondary text-sm">POLLS</span>
           </h1>
           <div className="hidden md:flex items-center gap-2 ml-3 pl-3 border-l border-white/10">

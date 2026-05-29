@@ -2,3 +2,4 @@ node_modules/
 dist/
 *.db
 .env
+local.settings.json

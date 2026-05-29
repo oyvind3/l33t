@@ -3,6 +3,8 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../App';
 import type { Suggestion } from '../types';
 
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
 const CATEGORY_MAP: Record<string, { label: string; icon: string; order: number }> = {
   'FPS': { label: 'FPS / Action', icon: '🔫', order: 1 },
   'Action': { label: 'FPS / Action', icon: '🔫', order: 1 },
@@ -43,7 +45,7 @@ export default function SuggestionBox() {
   const loadSuggestions = useCallback(async () => {
     if (!user) return;
     try {
-      const res = await fetch('/api/suggestions', {
+      const res = await fetch(API_BASE + '/api/suggestions', {
         headers: { 'x-user-id': user.id },
       });
       if (res.ok) {
@@ -65,7 +67,7 @@ export default function SuggestionBox() {
     if (!title.trim() || !user) return;
     setSubmitting(true);
     try {
-      const res = await fetch('/api/suggestions', {
+      const res = await fetch(API_BASE + '/api/suggestions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-user-id': user.id },
         body: JSON.stringify({ title: title.trim(), description: description.trim() }),
@@ -89,7 +91,7 @@ export default function SuggestionBox() {
   const handleDelete = async (id: string) => {
     if (!user) return;
     try {
-      const res = await fetch('/api/suggestions/' + id, {
+      const res = await fetch(API_BASE + '/api/suggestions/' + id, {
         method: 'DELETE',
         headers: { 'x-user-id': user.id },
       });

@@ -84,7 +84,7 @@ export default function LoginForm({ onLogin }: Props) {
                        disabled:opacity-40 disabled:cursor-not-allowed
                        active:scale-[0.98]"
           >
-            {loading ? '⏳ KOBLER TIL...' : '🎮 JOIN LAN'}
+            {loading ? '⏳ KOBLER TIL...' : '🎮 JOIN HANILAN'}
           </button>
 
           <button
