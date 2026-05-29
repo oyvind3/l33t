@@ -1,6 +1,6 @@
 import { app, HttpRequest, HttpResponseInit } from '@azure/functions';
 import { v4 as uuidv4 } from 'uuid';
-import { getAuthUser, suggestions } from '../store';
+import { getAuthUser, suggestions, addOptionToMainPoll } from '../store';
 
 // GET /api/suggestions
 app.http('suggestions-get', {
@@ -51,6 +51,9 @@ app.http('suggestions-create', {
       createdAt: new Date().toISOString(),
     };
     suggestions.set(id, suggestion);
+
+    // Auto-add to the main poll as a voting option
+    addOptionToMainPoll(body.title.trim());
 
     return { status: 201, jsonBody: suggestion };
   },

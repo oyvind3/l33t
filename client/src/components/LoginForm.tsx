@@ -33,8 +33,8 @@ export default function LoginForm({ onLogin }: Props) {
     <div className="w-full max-w-md animate-slide-in">
       <div className="bg-bg-card border border-neon-blue/30 rounded-xl p-8">
         <h1 className="font-mono text-3xl md:text-4xl font-bold text-center mb-2">
-          <span className="text-neon-green glow-green">LAN</span>{' '}
-          <span className="text-neon-blue glow-blue">PARTY</span>
+          <span className="text-neon-green glow-green">HANI</span>
+          <span className="text-neon-blue glow-blue">LAN</span>
         </h1>
         <p className="text-center text-text-secondary mb-1 font-mono text-sm">
           🎮 POLL SYSTEM v1.0

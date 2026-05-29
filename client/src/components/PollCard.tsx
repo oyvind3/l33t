@@ -28,11 +28,11 @@ export default function PollCard({ poll, onVote }: Props) {
   const [voting, setVoting] = useState(false);
   const status = STATUS_CONFIG[poll.status];
 
-  const handleVote = async (optionIndex: number) => {
+  const handleVote = async (option: string) => {
     if (poll.status !== 'open' || voting) return;
     setVoting(true);
     try {
-      await vote(poll.id, optionIndex);
+      await vote(poll.id, option);
       onVote();
     } catch {
       // handled by API
@@ -83,7 +83,7 @@ export default function PollCard({ poll, onVote }: Props) {
                 isSelected={isSelected}
                 disabled={poll.status !== 'open' || voting}
                 showResults={true}
-                onClick={() => handleVote(i)}
+                onClick={() => handleVote(option)}
               />
               {voters.length > 0 && (
                 <VoterList voters={voters} />

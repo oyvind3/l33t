@@ -65,10 +65,10 @@ export async function updatePollStatus(pollId: string, status: string): Promise<
   });
 }
 
-export async function vote(pollId: string, optionIndex: number): Promise<void> {
+export async function vote(pollId: string, option: string): Promise<void> {
   await request('/api/polls/' + pollId + '/vote', {
     method: 'POST',
-    body: JSON.stringify({ optionIndex }),
+    body: JSON.stringify({ option }),
   });
 }
 

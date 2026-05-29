@@ -13,8 +13,6 @@ app.http('polls-get', {
     const result = Array.from(polls.values())
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
       .map((poll) => {
-        const isAdmin = user.isAdmin;
-        const showVotes = poll.status === 'results' || isAdmin;
         const pollVotes = votes.filter((v) => v.pollId === poll.id);
 
         const voteCounts: number[] = poll.options.map((_, i) => {
@@ -31,17 +29,29 @@ app.http('polls-get', {
             .map((v) => ({ userId: v.userId, username: v.username }));
         });
 
+        // Sort options by vote count (most voted first)
+        const indices = poll.options.map((_, i) => i);
+        indices.sort((a, b) => (voteCounts[b] || 0) - (voteCounts[a] || 0));
+
+        const sortedOptions = indices.map((i) => poll.options[i]);
+        const sortedVoteCounts = indices.map((i) => voteCounts[i]);
+        const sortedVoters: Record<number, Array<{ userId: string; username: string }>> = {};
+        indices.forEach((origIdx, newIdx) => {
+          sortedVoters[newIdx] = votersMap[origIdx] || [];
+        });
+        const sortedUserVotes = myVotes.map((origIdx) => indices.indexOf(origIdx)).filter((i) => i !== -1);
+
         return {
           id: poll.id,
           title: poll.title,
           description: poll.description,
           category: poll.category,
           status: poll.status,
-          options: poll.options,
-          voteCounts,
-          voters: votersMap,
-          userVotes: myVotes,
-          totalVotes: voteCounts.reduce((a, b) => a + b, 0),
+          options: sortedOptions,
+          voteCounts: sortedVoteCounts,
+          voters: sortedVoters,
+          userVotes: sortedUserVotes,
+          totalVotes: sortedVoteCounts.reduce((a, b) => a + b, 0),
           createdAt: poll.createdAt,
         };
       });
@@ -155,36 +165,38 @@ app.http('polls-vote', {
     if (!user) return { status: 401, jsonBody: { error: 'Authentication required' } };
 
     const id = request.params.id!;
-    const body = (await request.json()) as { optionIndex?: number };
+    const body = (await request.json()) as { option?: string };
 
-    if (body.optionIndex === undefined || typeof body.optionIndex !== 'number') {
-      return { status: 400, jsonBody: { error: 'optionIndex is required and must be a number' } };
+    if (!body.option || typeof body.option !== 'string') {
+      return { status: 400, jsonBody: { error: 'option (game name) is required' } };
     }
 
     const poll = polls.get(id);
     if (!poll) return { status: 404, jsonBody: { error: 'Poll not found' } };
     if (poll.status !== 'open') return { status: 400, jsonBody: { error: 'Poll is not open for voting' } };
-    if (body.optionIndex < 0 || body.optionIndex >= poll.options.length) {
-      return { status: 400, jsonBody: { error: 'Invalid option index' } };
+
+    const optionIndex = poll.options.indexOf(body.option);
+    if (optionIndex === -1) {
+      return { status: 400, jsonBody: { error: 'Invalid option' } };
     }
 
     // Toggle vote: if already voted for this option, remove it. Otherwise, add it.
-    const existingIdx = votes.findIndex((v) => v.pollId === id && v.userId === user.id && v.optionIndex === body.optionIndex);
+    const existingIdx = votes.findIndex((v) => v.pollId === id && v.userId === user.id && v.optionIndex === optionIndex);
     if (existingIdx >= 0) {
       votes.splice(existingIdx, 1);
-      return { jsonBody: { message: 'Vote removed', optionIndex: body.optionIndex } };
+      return { jsonBody: { message: 'Vote removed', option: body.option } };
     }
 
     votes.push({
       id: uuidv4(),
       pollId: id,
-      optionIndex: body.optionIndex,
+      optionIndex,
       userId: user.id,
       username: user.username,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
 
-    return { status: 201, jsonBody: { message: 'Vote recorded', optionIndex: body.optionIndex } };
+    return { status: 201, jsonBody: { message: 'Vote recorded', option: body.option } };
   },
 });

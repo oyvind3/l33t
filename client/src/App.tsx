@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback, createContext, useContext } from 'react';
-import type { User, Poll, PollCategory } from './types';
+import type { User, Poll } from './types';
 import { fetchPolls, registerUser } from './api';
 import LoginForm from './components/LoginForm';
 import Header from './components/Header';
 import PollList from './components/PollList';
-import CategoryFilter from './components/CategoryFilter';
 import AdminPanel from './components/AdminPanel';
 import SuggestionBox from './components/SuggestionBox';
 import MusicPlayer from './components/MusicPlayer';
@@ -28,7 +27,6 @@ export function useAuth() {
 function App() {
   const [user, setUser] = useState<User | null>(null);
   const [polls, setPolls] = useState<Poll[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<PollCategory | 'Alle'>('Alle');
   const [showAdmin, setShowAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -82,10 +80,6 @@ function App() {
     localStorage.setItem('pollapp_user', JSON.stringify(u));
   };
 
-  const filteredPolls = selectedCategory === 'Alle'
-    ? polls
-    : polls.filter((p) => p.category === selectedCategory);
-
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
@@ -106,9 +100,7 @@ function App() {
 
           <SuggestionBox />
 
-          <CategoryFilter selected={selectedCategory} onSelect={setSelectedCategory} />
-
-          <PollList polls={filteredPolls} loading={loading} onVote={loadPolls} />
+          <PollList polls={polls} loading={loading} onVote={loadPolls} />
         </main>
 
         <MusicPlayer />
