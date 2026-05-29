@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg-dark: #0a0a0f;
+  --color-bg-card: #12121a;
+  --color-bg-card-hover: #1a1a25;
+  --color-neon-green: #00ff41;
+  --color-neon-blue: #00d4ff;
+  --color-neon-pink: #ff00aa;
+  --color-neon-yellow: #ffff00;
+  --color-text-primary: #e0e0e0;
+  --color-text-secondary: #888;
+  --font-mono: 'Share Tech Mono', monospace;
+  --font-sans: 'Inter', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-bg-dark);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg-dark);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-neon-blue);
+  border-radius: 3px;
+}
+
+/* Neon glow utilities */
+.glow-green {
+  text-shadow: 0 0 10px var(--color-neon-green), 0 0 20px var(--color-neon-green), 0 0 40px var(--color-neon-green);
+}
+
+.glow-blue {
+  text-shadow: 0 0 10px var(--color-neon-blue), 0 0 20px var(--color-neon-blue);
+}
+
+.box-glow-green {
+  box-shadow: 0 0 10px var(--color-neon-green), 0 0 20px rgba(0, 255, 65, 0.3);
+}
+
+.box-glow-blue {
+  box-shadow: 0 0 10px var(--color-neon-blue), 0 0 20px rgba(0, 212, 255, 0.3);
+}
+
+/* Animations */
+@keyframes pulse-neon {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes slide-in {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+
+/* Progress bar animation */
+.progress-bar {
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
