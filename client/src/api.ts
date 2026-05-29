@@ -26,6 +26,37 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(API_BASE + url, { ...options, headers });
   const data = await res.json();
 
+  if (res.status === 401 && userId) {
+    // User ID is stale (backend cold start). Re-register.
+    const stored = localStorage.getItem('pollapp_user');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      const regRes = await fetch(API_BASE + '/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: parsed.username }),
+      });
+      if (regRes.ok) {
+        const newUser = await regRes.json();
+        localStorage.setItem('pollapp_user', JSON.stringify(newUser));
+        // Retry with new ID
+        const retryHeaders: Record<string, string> = {
+          'Content-Type': 'application/json',
+          'x-user-id': newUser.id,
+          ...(options?.headers as Record<string, string> || {}),
+        };
+        const retryRes = await fetch(API_BASE + url, { ...options, headers: retryHeaders });
+        const retryData = await retryRes.json();
+        if (!retryRes.ok) {
+          const msg = retryData.error || 'Something went wrong';
+          toast.error(msg);
+          throw new Error(msg);
+        }
+        return retryData as T;
+      }
+    }
+  }
+
   if (!res.ok) {
     const msg = data.error || 'Something went wrong';
     toast.error(msg);

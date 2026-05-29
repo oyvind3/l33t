@@ -7,9 +7,6 @@ app.http('suggestions-get', {
   methods: ['GET'],
   route: 'suggestions',
   handler: async (request: HttpRequest): Promise<HttpResponseInit> => {
-    const user = getAuthUser(request);
-    if (!user) return { status: 401, jsonBody: { error: 'Authentication required' } };
-
     const result = Array.from(suggestions.values()).sort((a, b) =>
       b.createdAt.localeCompare(a.createdAt)
     );

@@ -8,7 +8,6 @@ app.http('polls-get', {
   route: 'polls',
   handler: async (request: HttpRequest): Promise<HttpResponseInit> => {
     const user = getAuthUser(request);
-    if (!user) return { status: 401, jsonBody: { error: 'Authentication required' } };
 
     const result = Array.from(polls.values())
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
@@ -19,7 +18,7 @@ app.http('polls-get', {
           return pollVotes.filter((v) => v.optionIndex === i).length;
         });
 
-        const myVotes = pollVotes.filter((v) => v.userId === user.id).map((v) => v.optionIndex);
+        const myVotes = user ? pollVotes.filter((v) => v.userId === user.id).map((v) => v.optionIndex) : [];
 
         // Always show voters so people can see who voted what
         const votersMap: Record<number, Array<{ userId: string; username: string }>> = {};
