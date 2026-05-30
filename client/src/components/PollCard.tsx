@@ -15,15 +15,6 @@ const STATUS_CONFIG = {
   results: { label: 'RESULTATER', color: 'text-neon-blue', border: 'border-neon-blue/30', bg: 'bg-neon-blue/10' },
 };
 
-const CATEGORY_ICONS: Record<string, string> = {
-  'FPS': '🔫',
-  'MOBA': '⚔️',
-  'Strategy': '🧠',
-  'Party Games': '🎉',
-  'Aktiviteter': '🏃',
-  'Annet': '🎲',
-};
-
 export default function PollCard({ poll, onVote }: Props) {
   const [voting, setVoting] = useState(false);
   const status = STATUS_CONFIG[poll.status];
