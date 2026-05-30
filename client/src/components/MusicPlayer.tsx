@@ -1,69 +1,24 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
-// Basshunter - DotA (YouTube video ID)
-const YOUTUBE_VIDEO_ID = 'jkO-MqPVcRs';
-
+// Uses a local audio file placed in `public/assets/basshunter.m4a`
 export default function MusicPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [volume, setVolume] = useState(30);
-  const [ready, setReady] = useState(false);
-  const playerRef = useRef<YT.Player | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const initPlayer = useCallback(() => {
-    if (playerRef.current) return;
-    const YT = (window as unknown as { YT: typeof globalThis.YT }).YT;
-    playerRef.current = new YT.Player('yt-player', {
-      height: '0',
-      width: '0',
-      videoId: YOUTUBE_VIDEO_ID,
-      playerVars: {
-        autoplay: 1,
-        loop: 1,
-        playlist: YOUTUBE_VIDEO_ID,
-        origin: window.location.origin,
-      },
-      events: {
-        onReady: (event: YT.PlayerEvent) => {
-          event.target.setVolume(volume);
-          event.target.playVideo();
-          setReady(true);
-          setIsPlaying(true);
-        },
-      },
-    });
+  useEffect(() => {
+    if (!audioRef.current) return;
+    audioRef.current.volume = Math.min(Math.max(volume / 100, 0), 1);
   }, [volume]);
 
-  const loadAndPlay = useCallback(() => {
-    if (playerRef.current) {
-      playerRef.current.playVideo();
-      setIsPlaying(true);
-      return;
-    }
-    const win = window as unknown as Record<string, unknown>;
-    if (win.YT && (win.YT as { Player?: unknown }).Player) {
-      initPlayer();
-    } else {
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      document.head.appendChild(tag);
-      (win as Record<string, () => void>).onYouTubeIframeAPIReady = () => {
-        initPlayer();
-      };
-    }
-  }, [initPlayer]);
-
   const togglePlay = () => {
-    if (!ready) {
-      loadAndPlay();
-      return;
-    }
-    if (!playerRef.current) return;
+    const audio = audioRef.current;
+    if (!audio) return;
     if (isPlaying) {
-      playerRef.current.pauseVideo();
+      audio.pause();
     } else {
-      playerRef.current.playVideo();
+      audio.play().catch(() => {});
     }
     setIsPlaying(!isPlaying);
   };
@@ -71,18 +26,19 @@ export default function MusicPlayer() {
   const handleVolume = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = Number(e.target.value);
     setVolume(val);
-    if (playerRef.current) {
-      playerRef.current.setVolume(val);
-    }
+    if (audioRef.current) audioRef.current.volume = val / 100;
   };
 
   return (
-    <div
-      ref={containerRef}
-      className="fixed bottom-4 right-4 z-50"
-    >
-      {/* Hidden YouTube player */}
-      <div id="yt-player" className="hidden" />
+    <div className="fixed bottom-4 right-4 z-50">
+      <audio
+        ref={audioRef}
+        src="/assets/basshunter.m4a"
+        loop
+        preload="auto"
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
+      />
 
       {expanded ? (
         <div className="bg-bg-card border border-neon-blue/30 rounded-xl p-4 shadow-lg animate-slide-in w-64">
