@@ -12,6 +12,13 @@ export default function MusicPlayer() {
     audioRef.current.volume = Math.min(Math.max(volume / 100, 0), 1);
   }, [volume]);
 
+  // Auto-play on mount
+  useEffect(() => {
+    if (!audioRef.current) return;
+    audioRef.current.play().catch(() => {});
+    setIsPlaying(true);
+  }, []);
+
   const togglePlay = () => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -34,6 +41,7 @@ export default function MusicPlayer() {
       <audio
         ref={audioRef}
         src="/assets/basshunter.m4a"
+        autoPlay
         loop
         preload="auto"
         onPlay={() => setIsPlaying(true)}
